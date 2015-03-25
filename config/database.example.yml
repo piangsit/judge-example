@@ -1,0 +1,26 @@
+development:
+  adapter:  postgresql
+  host:     localhost
+  encoding: unicode
+  database: railsroots_development
+  pool:     5
+  username: yourpgusername
+  password:
+
+test:
+  adapter:  postgresql
+  host:     localhost
+  encoding: unicode
+  database: railsroots_test
+  pool:     5
+  username: yourpgusername
+  password:
+
+production:
+  adapter:  postgresql
+  host:     localhost
+  encoding: unicode
+  database: railsroots_production
+  pool:     5
+  username: postgres
+  password: postgres
