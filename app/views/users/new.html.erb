@@ -15,11 +15,11 @@
 
   <div class="field">
     <%= f.label :name %><br>
-    <%= f.text_field :name, validate: true %>
+    <%= f.text_field :name, validate: true, class: 'form-control' %>
   </div>
   <div class="field">
     <%= f.label :password %><br>
-    <%= f.password_field :password, validate: true %>
+    <%= f.password_field :password, validate: true, class: 'form-control' %>
   </div>
   <div class="field">
     <%= f.label :password_confirmation %><br>
@@ -27,7 +27,7 @@
   </div>
   <div class="field">
     <%= f.label :email %><br>
-    <%= f.text_field :email, validate: true %>
+    <%= f.text_field :email, validate: true, class: 'form-control' %>
   </div>
   <div class="actions">
     <%= f.submit %>
@@ -38,55 +38,47 @@
 
 
 <script language="JavaScript">
-  var frm = $('#new_user');
-  var formValid;
+  judgeValidateForm($('#new_user'));
 
-  $(frm).submit(function(e){
-    e.preventDefault();
+  function asyncValidateInput(elm) {
+    var dfd = new $.Deferred();
 
-    formValid = true;
-
-    judge.validate(document.getElementById('user_name'),{
-      valid: function(element){
-        element.style.border = '';
-        $(element).parent().find('.field_with_errors').remove();
-      },
-      invalid: function(element, messages) {
-        element.style.border = '1px solid red';
-        $(element).parent().find('.field_with_errors').remove();
-        $(element).after('<p class="field_with_errors">' + messages.join(',') + '</p>');
-        formValid = false;
-      }
-    });
-
-    judge.validate(document.getElementById('user_password'),{
-      valid: function(element){
-        element.style.border = '';
-        $(element).parent().find('.field_with_errors').remove();
-      },
-      invalid: function(element, messages) {
-        element.style.border = '1px solid red';
-        $(element).parent().find('.field_with_errors').remove();
-        $(element).after('<p class="field_with_errors">' + messages.join(',') + '</p>');
-        formValid = false;
-      }
-    });
-
-    judge.validate(document.getElementById('user_email'),function(element, status, messages){
+    var q = judge.validate(elm,function(element, status, messages){
       if(status == 'valid'){
         element.style.border = '';
         $(element).parent().find('.field_with_errors').remove();
+        dfd.resolve();
       }else if(status == 'invalid'){
         element.style.border = '1px solid red';
         $(element).parent().find('.field_with_errors').remove();
         $(element).after('<p class="field_with_errors">' + messages.join(',') + '</p>');
-        formValid = false;
+        dfd.reject();
       }
     });
 
-    if(formValid){
-      $(frm).unbind('submit');
-      $(frm).submit();
+    if(q.validations.length == 0){
+      dfd.resolve();
     }
-  });
+
+    return dfd;
+  }
+
+  function judgeValidateForm(frm) {
+    $(frm).submit(function (e) {
+      e.preventDefault();
+
+      $(frm).find('.field_with_errors').remove();
+
+      var defers = [];
+
+      $(frm).find('.form-control').each(function (idx, elm) {
+        defers.push(asyncValidateInput(elm));
+      });
+
+      $.when.apply($, defers).done(function() {
+        $(frm).unbind('submit');
+        $(frm).submit();
+      });
+    });
+  }
 </script>
